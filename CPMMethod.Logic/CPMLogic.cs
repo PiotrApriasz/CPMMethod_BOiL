@@ -2,19 +2,11 @@ namespace CPMMethod.Logic
 {
     public class CPMLogic
     {
-        private static uint GetMinEarlyFinish(Activity[] activities)
-        {
-            return 0;
-        }
-        private static uint GetMaxLateStart(Activity[] activities)
-        {
-            return 0;
-        }
         private static Activity[] CalculateEarly(Activity[] activities)
         {
             foreach(Activity activity in activities)
             {
-                activity.EarlyStart = GetMinEarlyFinish(activity.Preccessors);
+                activity.EarlyStart =  activity.Preccessors?.Length > 0 ? activity.Preccessors.Min(actv => actv.EarlyFinish) : 0;
                 activity.EarlyFinish = activity.EarlyStart + activity.Duration;
             }
 
@@ -24,15 +16,29 @@ namespace CPMMethod.Logic
         {
             foreach(Activity activity in activities)
             {
-                activity.LateFinish = GetMaxLateStart(activity.Successors);
+                activity.LateFinish = activity.Successors?.Length > 0 ? activity.Successors.Max(actv => actv.LateStart) : activity.EarlyFinish;
                 activity.LateStart = activity.LateFinish - activity.Duration;
             }
 
             return activities;
         }
-        private static String GetCriticalPath(Activity[] acitvities)
+        public static Activity[] GetCriticalPath(Activity[] acitvities)
         {
-            return String.Empty;
+            Activity[] CriticalPath = {};
+
+            // Sort acitvities
+            CalculateEarly(acitvities);
+            CalculateLate(acitvities);
+
+            foreach(Activity activity in acitvities)
+            {
+                if(activity.LateStart - activity.EarlyStart == 0 && activity.LateFinish - activity.LateStart == 0)
+                {
+                    CriticalPath.Append(activity);
+                }
+            }
+
+            return CriticalPath;
         }
     }
 }
