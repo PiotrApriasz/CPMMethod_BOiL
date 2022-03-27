@@ -1,8 +1,53 @@
 ﻿@page "/Cpm"
+@using Syncfusion.Blazor.Grids;
+@using System.ComponentModel.DataAnnotations;
+@using CPMMethod.Logic
+@using System.ComponentModel
+@using Syncfusion.Blazor.Popups
 
-<h3>Metoda CPM</h3>
+<h2>Metoda CPM</h2>
 
+<h3>1. Wpisz dane czynności i zdarzeń do tabeli a po skończeniu kliknij przycisk Oblicz</h3>
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+            <SfGrid TValue="Activity" DataSource="@Activities" AllowPaging="false"
+                    Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Cancel", "Update" })">
+                <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Normal"
+                                  NewRowPosition="NewRowPosition.Bottom"></GridEditSettings>
+                <GridEvents TValue="Activity" OnActionBegin="ActionBegin"></GridEvents>
+                <GridColumns>
+                    <GridColumn Field="@nameof(Activity.Id)" IsPrimaryKey="true" ></GridColumn>
+                    <GridColumn Field="@nameof(Activity.Description)"></GridColumn>
+                    <GridColumn Field="@nameof(Activity.Duration)"
+                                ValidationRules="@(new ValidationRules { Required = true, Range = new double[] { 0, 1000 }})"></GridColumn>
+                    <GridColumn Field="@nameof(Activity.PreActivities)"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+</div>
 
 @code {
-      
+    
+    private List<Activity> Activities { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Activities = new List<Activity>();
+    }
+
+    private void ActionBegin(ActionEventArgs<Activity> arg)
+    {
+        if (arg.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save))
+        {
+            arg.Index = arg.Action switch
+            {
+                "Add" => Activities.Count(),
+                _ => arg.Index
+                };
+        }
+    }
+
 }
