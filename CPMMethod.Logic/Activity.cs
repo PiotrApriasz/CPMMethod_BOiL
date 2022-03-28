@@ -20,12 +20,16 @@ namespace CPMMethod.Logic
         [Required(ErrorMessage = "Aktywność poprzedzająca jest wymagana")]
         public string PreActivities { get; set; }
         
-        public double EarlyStart;
-        public double LateStart;
-        public double EarlyFinish;
-        public double LateFinish;
+        [Display(Name = "Wczesny Start")]
+        public double EarlyStart { get; set; }
+        [Display(Name = "Późny Start")]
+        public double LateStart { get; set; }
+        [Display(Name = "Wczesne Zakończenie")]
+        public double EarlyFinish { get; set; }
+        [Display(Name = "Późne Zakończnie")]
+        public double LateFinish { get; set; }
 
-        public Activity[] Successors { get; set; } 
-        public Activity[] Preccessors { get; set; }
+        public List<Activity> Successors { get; set; } 
+        public List<Activity> Preccessors { get; set; }
     }
 }

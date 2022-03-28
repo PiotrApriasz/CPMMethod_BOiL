@@ -1,28 +1,30 @@
 namespace CPMMethod.Logic
 {
-    public class CPMLogic
+    public static class CPMLogic
     {
-        private static Activity[] CalculateEarly(Activity[] activities)
+        public static IEnumerable<Activity> CalculateEarly(this IEnumerable<Activity> activities)
         {
             foreach(Activity activity in activities)
             {
-                activity.EarlyStart =  activity.Preccessors?.Length > 0 ? activity.Preccessors.Min(actv => actv.EarlyFinish) : 0;
+                activity.EarlyStart =  activity.Preccessors?.Count > 0 ? activity.Preccessors.Min(actv => actv.EarlyFinish) : 0;
                 activity.EarlyFinish = activity.EarlyStart + activity.Duration;
             }
 
             return activities;
         }
-        private static Activity[] CalculateLate(Activity[] activities)
+        public static IEnumerable<Activity> CalculateLate(this IEnumerable<Activity> activities)
         {
-            foreach(Activity activity in activities)
+            var activitiesReversed = activities.Reverse();
+            
+            foreach(Activity activity in activitiesReversed)
             {
-                activity.LateFinish = activity.Successors?.Length > 0 ? activity.Successors.Max(actv => actv.LateStart) : activity.EarlyFinish;
+                activity.LateFinish = activity.Successors?.Count > 0 ? activity.Successors.Max(actv => actv.LateStart) : activity.EarlyFinish;
                 activity.LateStart = activity.LateFinish - activity.Duration;
             }
 
-            return activities;
+            return activitiesReversed.Reverse();
         }
-        public static Activity[] GetCriticalPath(Activity[] acitvities)
+        public static IEnumerable<Activity> GetCriticalPath(this IEnumerable<Activity> acitvities)
         {
             Activity[] CriticalPath = {};
 
