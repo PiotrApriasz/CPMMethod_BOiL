@@ -29,6 +29,12 @@ namespace CPMMethod.Logic
         [Display(Name = "Późne Zakończnie")]
         public double LateFinish { get; set; }
 
+        [Display(Name = "Rezerwa")]
+        public double Reserve { get; set; }
+
+        [Display(Name = "Czynność krytyczna")]
+        public bool Critical { get; set; }
+
         public List<Activity> Successors { get; set; } 
         public List<Activity> Preccessors { get; set; }
     }
