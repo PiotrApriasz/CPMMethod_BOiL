@@ -2,43 +2,47 @@ using System.Reflection;
 
 namespace CPMMethod.Logic
 {
-    public class CPMLogic
+    public static class CPMLogic
     {
-        private static uint GetMinEarlyFinish(Activity[] activities)
-        {
-            return 0;
-        }
-
-        private static uint GetMaxLateStart(Activity[] activities)
-        {
-            return 0;
-        }
-
-        private static Activity[] CalculateEarly(Activity[] activities)
+        public static IEnumerable<Activity> CalculateEarly(this IEnumerable<Activity> activities)
         {
             foreach (Activity activity in activities)
             {
-                activity.EarlyStart = GetMinEarlyFinish(activity.Preccessors);
+                activity.EarlyStart =  activity.Preccessors?.Count > 0 ? activity.Preccessors.Min(actv => actv.EarlyFinish) : 0;
                 activity.EarlyFinish = activity.EarlyStart + activity.Duration;
             }
 
             return activities;
         }
-
-        private static Activity[] CalculateLate(Activity[] activities)
+        public static IEnumerable<Activity> CalculateLate(this IEnumerable<Activity> activities)
         {
-            foreach (Activity activity in activities)
+            var activitiesReversed = activities.Reverse();
+            
+            foreach(Activity activity in activitiesReversed)
             {
-                activity.LateFinish = GetMaxLateStart(activity.Successors);
+                activity.LateFinish = activity.Successors?.Count > 0 ? activity.Successors.Max(actv => actv.LateStart) : activity.EarlyFinish;
                 activity.LateStart = activity.LateFinish - activity.Duration;
             }
 
-            return activities;
+            return activitiesReversed.Reverse();
         }
-
-        private static String GetCriticalPath(Activity[] acitvities)
+        public static IEnumerable<Activity> GetCriticalPath(this IEnumerable<Activity> acitvities)
         {
-            return String.Empty;
+            Activity[] CriticalPath = {};
+
+            // Sort acitvities
+            CalculateEarly(acitvities);
+            CalculateLate(acitvities);
+
+            foreach(Activity activity in acitvities)
+            {
+                if(activity.LateStart - activity.EarlyStart == 0 && activity.LateFinish - activity.LateStart == 0)
+                {
+                    CriticalPath.Append(activity);
+                }
+            }
+
+            return CriticalPath;
         }
 
         private static Activity[] Sort(Activity[] activities, int l, int r)
