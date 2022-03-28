@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPMMethod.BlazorWasmClient"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPMMethod.Logic", "CPMMethod.Logic\CPMMethod.Logic.csproj", "{98EDA60E-9169-4539-AACD-977581AD68E8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPMMethod.Tests", "CPMMethod.Tests\CPMMethod.Tests.csproj", "{80E15834-9B6E-4125-AA67-1321412C44FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{98EDA60E-9169-4539-AACD-977581AD68E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98EDA60E-9169-4539-AACD-977581AD68E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98EDA60E-9169-4539-AACD-977581AD68E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80E15834-9B6E-4125-AA67-1321412C44FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80E15834-9B6E-4125-AA67-1321412C44FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80E15834-9B6E-4125-AA67-1321412C44FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80E15834-9B6E-4125-AA67-1321412C44FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
