@@ -157,8 +157,9 @@
             
             
         }
-        Activities = Activities.CalculateEarly().ToList();
-        Activities = Activities.CalculateLate().ToList();
+
+        Activities.InitActivitiesFields();
+
         _calculated = true;
     }
 

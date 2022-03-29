@@ -9,17 +9,17 @@ namespace CPMMethod.Logic
         [Required(ErrorMessage = "Id Aktywności jest wymagane")]
         [CustomValidationActivityId]
         public string Id { get; set; } = String.Empty;
-        
+
         [Display(Name = "Opis")]
         public string Description { get; set; } = String.Empty;
-        
+
         [Display(Name = "Czas Trwania")]
-        public uint Duration { get; set; }
-        
+        public double Duration { get; set; }
+
         [Display(Name = "Aktywność Poprzedzająca")]
         [Required(ErrorMessage = "Aktywność poprzedzająca jest wymagana")]
-        public string PreActivities { get; set; }
-        
+        public string PreActivities { get; set; } = String.Empty;
+
         [Display(Name = "Wczesny Start")]
         public double EarlyStart { get; set; }
         [Display(Name = "Późny Start")]
@@ -35,7 +35,7 @@ namespace CPMMethod.Logic
         [Display(Name = "Czynność krytyczna")]
         public bool Critical { get; set; }
 
-        public List<Activity> Successors { get; set; } 
-        public List<Activity> Preccessors { get; set; }
+        public List<Activity> Successors { get; set; } = new List<Activity>();
+        public List<Activity> Preccessors { get; set; } = new List<Activity>();
     }
 }
