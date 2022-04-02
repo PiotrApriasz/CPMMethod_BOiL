@@ -1,0 +1,60 @@
+@using Syncfusion.Blazor.Gantt
+@using CPMMethod.Logic
+
+<SfGantt DataSource="@GanttActivities" Height="450px" Width="100%" HighlightWeekends="true" TreeColumnIndex="1"
+                     ProjectStartDate="@ProjectStart" ProjectEndDate="@ProjectEnd">
+    <GanttTaskFields Id="TaskName" Name="TaskName" StartDate="StartDate" EndDate="EndDate" Duration="Duration"
+                     Dependency="Predecessor"></GanttTaskFields>
+    <GanttColumns>
+        <GanttColumn Field="TaskName" HeaderText="Id Aktywności"></GanttColumn>
+        <GanttColumn Field="Description" HeaderText="Opis"></GanttColumn>
+    </GanttColumns>
+    <GanttLabelSettings LeftLabel="TaskName" TValue="GanttActivity"> </GanttLabelSettings>
+    <GanttSplitterSettings Position="25%"> </GanttSplitterSettings>
+</SfGantt>
+
+@code {
+    [Parameter]
+    public List<Activity> Activities { get; set; }
+    private List<GanttActivity> GanttActivities { get; set; }
+    private DateTime ProjectStart { get; set; }
+    private DateTime ProjectEnd { get; set; }
+
+    private DateTime _currentDate;
+    private double _timePassed = 0;
+
+    protected override void OnInitialized()
+    {
+        ProjectStart = DateTime.Now;
+        GanttActivities = new List<GanttActivity>();
+
+        for (var index = 0; index < Activities.Count; index++)
+        {
+            var activity = Activities[index];
+            var ganttActivity = new GanttActivity()
+            {
+                TaskId = activity.Id,
+                Duration = activity.Duration,
+                Description = activity.Description,
+                Predecessor = activity.PreActivities
+            };
+
+            if (index == 0)
+            {
+                _currentDate = ProjectStart;
+                ganttActivity.StartDate = _currentDate;
+                _currentDate = _currentDate.AddDays(activity.Duration);
+                ganttActivity.EndDate = _currentDate;
+            }
+            else
+            {
+                ganttActivity.StartDate = _currentDate;
+                _currentDate = _currentDate.AddDays(activity.Duration);
+                ganttActivity.EndDate = _currentDate;
+            }
+            
+            GanttActivities.Add(ganttActivity);
+        }
+    }
+
+}

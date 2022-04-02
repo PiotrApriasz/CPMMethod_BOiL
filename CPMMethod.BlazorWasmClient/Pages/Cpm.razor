@@ -4,6 +4,11 @@
 @using CPMMethod.Logic
 @using System.ComponentModel
 @using Syncfusion.Blazor.Buttons
+@using CPMMethod.BlazorWasmClient.Components
+@using Syncfusion.Blazor.Gantt
+@using CPMMethod.Logic
+@using EditMode = Syncfusion.Blazor.Grids.EditMode
+
 
 <h1>Metoda CPM</h1>
 <br/>
@@ -40,7 +45,7 @@
             <br/>
             <h3>2. Oto tabela przedstawiająca czynności z wyliczonymi czasami</h3>
             <br/>
-            <SfGrid TValue="Activity" DataSource="@Activities" AllowPaging="false">
+            <SfGrid TValue="Activity" DataSource="@Activities" AllowPaging="false" class="table">
                 <GridColumns>
                     <GridColumn Field="@nameof(Activity.Id)"></GridColumn>
                     <GridColumn Field="@nameof(Activity.Description)"></GridColumn>
@@ -53,6 +58,20 @@
                     <GridColumn Field="@nameof(Activity.Critical)"></GridColumn>
                 </GridColumns>
             </SfGrid>
+            
+            <h3>3. Oto podstawowy wykres Gantta</h3>
+            <br/>
+            <SfGantt DataSource="@GanttActivities" Height="450px" Width="100%" HighlightWeekends="true"
+                                 >
+                <GanttTaskFields Id="TaskId" Name="TaskId" StartDate="StartDate" EndDate="EndDate" Duration="Duration"
+                                 Dependency="Predecessor"></GanttTaskFields>
+                <GanttColumns>
+                    <GanttColumn Field="TaskName" HeaderText="Id Aktywności"></GanttColumn>
+                    <GanttColumn Field="Description" HeaderText="Opis"></GanttColumn>
+                </GanttColumns>
+                <GanttLabelSettings LeftLabel="TaskName" TValue="GanttActivity"> </GanttLabelSettings>
+                <GanttSplitterSettings Position="25%"> </GanttSplitterSettings>
+            </SfGantt>
         }
     </div>
 </div>
@@ -88,42 +107,94 @@
         font-weight: normal;
         font-style: normal;
     }
+    
+    .table {
+        margin-bottom: 2rem;
+    }
 </style>
 
 @code {
     
-    private List<Activity> Activities { get; set; }
+    public List<Activity> Activities { get; set; }
+    private List<GanttActivity> GanttActivities { get; set; }
+    private DateTime ProjectStart { get; set; }
+    private DateTime ProjectEnd { get; set; }
+
+    private DateTime _currentDate;
+    private double _timePassed = 0;
+    
     bool _calculated;
 
     protected override void OnInitialized()
     {
-        Activities = new List<Activity>()
+        Activity A = new()
         {
-            new()
-            {
-                Id = "A",
-                Duration = 2,
-                PreActivities = "-"
-            },
-            new()
-            {
-                Id = "B",
-                Duration = 5,
-                PreActivities = "A"
-            },
-            new()
-            {
-                Id = "C",
-                Duration = 1,
-                PreActivities = "A"
-            },
-            new()
-            {
-                Id = "D",
-                Duration = 4,
-                PreActivities = "B,C"
-            },
+            Id = "A",
+            Duration = 1,
+            Preccessors = new List<Activity> {         },
+            PreActivities = "-",
+            Description = "Aktywność 1"
         };
+        Activity B = new()
+        {
+            Id = "B",
+            Duration = 1,
+            Preccessors = new List<Activity> { A       },
+            PreActivities = "A",
+            Description = "Gotowanie makaronu"
+        };
+        Activity C = new()
+        {
+            Id = "C",
+            Duration = 5,
+            Preccessors = new List<Activity> { B       },
+            PreActivities = "B",
+            Description = "Programowanie w C"
+        };
+        Activity E = new()
+        {
+            Id = "E",
+            Duration = 4,
+            Preccessors = new List<Activity> { B       },
+            PreActivities = "B"
+        };
+        Activity F = new()
+        {
+            Id = "F",
+            Duration = 3,
+            Preccessors = new List<Activity> { B       },
+            PreActivities = "B"
+        };
+        Activity G = new()
+        {
+            Id = "G",
+            Duration = 2,
+            Preccessors = new List<Activity> { C       },
+            PreActivities = "C"
+        };
+        Activity D = new()
+        {
+            Id = "D",
+            Duration = 3,
+            Preccessors = new List<Activity> { C       },
+            PreActivities = "C"
+        };
+        Activity H = new()
+        {
+            Id = "H",
+            Duration = 1,
+            Preccessors = new List<Activity> { D, E, F },
+            PreActivities = "D,E,F"
+        };
+        Activity I = new()
+        {
+            Id = "I",
+            Duration = 2,
+            Preccessors = new List<Activity> { G, H    },
+            PreActivities = "G,H"
+        };
+
+        Activities = new List<Activity>{A, B, C, D, E, F, G, H, I};
     }
 
     private void ActionBegin(ActionEventArgs<Activity> arg)
@@ -140,25 +211,39 @@
 
     private void CalculateCPM()
     {
-        foreach (var activity in Activities)
-        {
-            activity.Preccessors = new List<Activity>();
-            activity.Successors = new List<Activity>();
-            
-            if (activity.PreActivities != "-")
-            {
-                var preActivities = activity.PreActivities.Split(',');
-                foreach (var preActivity in preActivities)
-                {
-                    activity.Preccessors.Add(Activities.Find(x => x.Id == preActivity)
-                                             ?? throw new InvalidOperationException());
-                }
-            }
-            
-            
-        }
-
+        Activities.CalculatePreccessors();
         Activities.InitActivitiesFields();
+        
+        ProjectStart = DateTime.Now;
+        GanttActivities = new List<GanttActivity>();
+
+        for (var index = 0; index < Activities.Count; index++)
+        {
+            var activity = Activities[index];
+            var ganttActivity = new GanttActivity()
+            {
+                TaskId = activity.Id,
+                Duration = activity.Duration,
+                Description = activity.Description,
+                Predecessor = activity.PreActivities,
+            };
+
+            if (index == 0)
+            {
+                _currentDate = ProjectStart;
+                ganttActivity.StartDate = _currentDate;
+                _currentDate = _currentDate.AddDays(activity.Duration);
+                ganttActivity.EndDate = _currentDate;
+            }
+            else
+            {
+                ganttActivity.StartDate = _currentDate;
+                _currentDate = _currentDate.AddDays(activity.Duration);
+                ganttActivity.EndDate = _currentDate;
+            }
+
+            GanttActivities.Add(ganttActivity);
+        }
 
         _calculated = true;
     }
