@@ -1,27 +1,35 @@
 
+// ReSharper disable PossibleMultipleEnumeration
+
+using System.Runtime.Intrinsics.X86;
+
 namespace CPMMethod.Logic
 {
     public static class CpmLogic
     {
-        public static void MoveForward(this IEnumerable<Activity> activities)
+        private static void MoveForward(this IEnumerable<Activity> activities)
         {
             foreach (var activity in activities)
             {
-                activity.EarlyStart =  activity.Preccessors?.Count > 0 ? activity.Preccessors.Max(actv => actv.EarlyFinish) : 0;
+                activity.EarlyStart =  activity.Preccessors.Count > 0 ? activity.Preccessors.Max(actv => actv.EarlyFinish) : 0;
                 activity.EarlyFinish = activity.EarlyStart + activity.Duration;
                 activity.Successors = new List<Activity>();
 
-                foreach(var preccessor in activity.Preccessors ?? Enumerable.Empty<Activity>())
+                foreach(var preccessor in activity.Preccessors)
                 {
                     preccessor.Successors.Add(activity);
                 }
             }
         }
-        public static void MoveBackward(this IEnumerable<Activity> activities)
+
+        private static void MoveBackward(this IEnumerable<Activity> activities)
         {
+            var fullTime = activities.FindFullTime();
             foreach(var activity in activities.Reverse())
             {
-                activity.LateFinish = activity.Successors?.Count > 0 ? activity.Successors.Min(actv => actv.LateStart) : activity.EarlyFinish;
+                //activity.LateFinish = activity.Successors?.Count > 0 ? activity.Successors.Min(actv => actv.LateStart) : activity.EarlyFinish;
+                activity.LateFinish =
+                    activity.Successors.Count > 0 ? activity.Successors.Min(actv => actv.LateStart) : fullTime;
                 activity.LateStart = activity.LateFinish - activity.Duration;
             }
         }
@@ -35,7 +43,7 @@ namespace CPMMethod.Logic
             activities.MoveBackward();
 
             // Find all activities witch belong to critical paths
-            activities.ForEach(actv => actv.Critical = actv.EarlyStart == actv.LateStart && actv.EarlyFinish == actv.LateFinish);
+            activities.ForEach(actv => actv.Critical = Math.Abs(actv.EarlyStart - actv.LateStart) < 1E-20 && Math.Abs(actv.EarlyFinish - actv.LateFinish) < 1E-20);
         }
 
         public static void CalculatePreccessors(this List<Activity> activities)
@@ -54,43 +62,96 @@ namespace CPMMethod.Logic
             }
         }
 
-        public static List<GanttActivity> CalculateGanttActivities(this List<Activity> activities)
+        public static List<GanttActivity> CalculateGanttActivities(this IEnumerable<Activity> activities)
         {
-            var projectStart = DateTime.Now;
-            var currentDate = DateTime.Now;
-            
-            var ganttActivities = new List<GanttActivity>();
-        
-            for (var index = 0; index < activities.Count; index++)
-            {
-                var activity = activities[index];
-                var duration = (int)(activity.LateFinish - activity.EarlyStart);
-                var ganttActivity = new GanttActivity()
+            return (from activity in activities
+                let duration = (int)(activity.LateFinish - activity.EarlyStart)
+                select new GanttActivity()
                 {
-                    TaskId = activity.Id,
+                    TaskId = activity.Id, 
                     TaskName = activity.Name,
                     Duration = duration.ToString(),
                     Predecessor = activity.PreActivities,
-                };
+                }).ToList();
+        }
 
-                if (index == 0)
+        public static List<GanttActivity> CalculateAsapGanttActivities(this IEnumerable<Activity> activities)
+        {
+            var ganttActivities = new List<GanttActivity>()
+            {
+                new()
                 {
-                    currentDate = projectStart;
-                    ganttActivity.StartDate = currentDate;
-                    currentDate = currentDate.AddDays(duration);
-                    ganttActivity.EndDate = currentDate;
-                }
-                else
+                    TaskId = 1,
+                    TaskName = "A",
+                    Duration = "5",
+                    Predecessor = "-",
+                    Progress = 100
+                },
+                new()
                 {
-                    ganttActivity.StartDate = currentDate;
-                    currentDate = currentDate.AddDays(duration);
-                    ganttActivity.EndDate = currentDate;
-                }
-
-                ganttActivities.Add(ganttActivity);
-            }
+                    TaskId = 2,
+                    TaskName = "B",
+                    Duration = "7",
+                    Predecessor = "-",
+                    Progress = 100
+                },
+                new()
+                {
+                    TaskId = 3,
+                    TaskName = "C",
+                    Duration = "6",
+                    Predecessor = "1",
+                    Progress = 100
+                },
+                new()
+                {
+                    TaskId = 4,
+                    TaskName = "D",
+                    Duration = "10",
+                    Predecessor = "1",
+                    //Progress = ((10 - 2) / 10) * 100 //(Duration - Reserve) / Duration * 100
+                    Progress = 80 //wychodzi na to ze ten procent musi byc policzony wczesniej bo tak jak wyzej to nie pokaze sie na wykresie
+                },
+                new()
+                {
+                    TaskId = 5,
+                    TaskName = "E",
+                    Duration = "8",
+                    Predecessor = "2",
+                    Progress = 37.5
+                },
+                new()
+                {
+                    TaskId = 6,
+                    TaskName = "F",
+                    Duration = "4",
+                    Predecessor = "3",
+                    Progress = 100
+                },
+                new()
+                {
+                    TaskId = 7,
+                    TaskName = "G",
+                    Duration = "9",
+                    Predecessor = "3",
+                    Progress = 22.22
+                },
+                new()
+                {
+                    TaskId = 8,
+                    TaskName = "H",
+                    Duration = "5",
+                    Predecessor = "4,5,6",
+                    Progress = 100
+                },
+            };
 
             return ganttActivities;
+        }
+
+        private static double FindFullTime(this IEnumerable<Activity> activities)
+        {
+            return activities.Select(activity => activity.EarlyFinish).Prepend(0).Max();
         }
     }
 }

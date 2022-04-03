@@ -1,12 +1,14 @@
 @using Syncfusion.Blazor.Gantt
 @using CPMMethod.Logic
+@using System.Diagnostics
+@using Activity = CPMMethod.Logic.Activity
 
 
-<h3>3. Oto podstawowy wykres Gantta</h3>
 <br/>
 <div class="table">
-    <SfGantt TValue="GanttActivity" DataSource="@GanttActivities" Height="450px" Width="100%" HighlightWeekends="true">
-        <GanttTaskFields Id="TaskId" Name="TaskName" StartDate="StartDate" EndDate="EndDate" Duration="Duration"
+    <SfGantt TValue="GanttActivity" DataSource="@GanttActivities" Height="450px" Width="100%" HighlightWeekends="true"
+             TreeColumnIndex="1" ProjectStartDate="@ProjectStart" IncludeWeekend="true">
+        <GanttTaskFields Id="TaskId" Name="TaskName"  Duration="Duration"
                          Dependency="Predecessor"  Progress="Progress" Child="SubTasks"></GanttTaskFields>
         <GanttColumns>
             <GanttColumn Field="TaskId" HeaderText="Id Aktywności"></GanttColumn>
@@ -22,14 +24,31 @@
 #pragma warning disable CS8618
         public List<Activity> Activities { get; set; }
 #pragma warning restore CS8618
+    [Parameter]
+    public GanttCharts GanttType { get; set; }
     
 #pragma warning disable CS8618
     private List<GanttActivity> GanttActivities { get; set; }
 #pragma warning restore CS8618
 
+    private static readonly DateTime ProjectStart = DateTime.Now;
+
     protected override void OnInitialized()
     {
-        GanttActivities = Activities.CalculateGanttActivities();
+        switch (GanttType)
+        {
+            case GanttCharts.Standard:
+                GanttActivities = Activities.CalculateGanttActivities();
+                break;
+            case GanttCharts.Asap:
+                GanttActivities = Activities.CalculateAsapGanttActivities();
+                break;
+            case GanttCharts.Alap:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
     }
 
 }

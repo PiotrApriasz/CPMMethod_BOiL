@@ -8,7 +8,7 @@ public class GanttActivity
     public DateTime EndDate { get; set; }
     public string Duration { get; set; }
     public string Predecessor { get; set; }
-    public int Progress { get; set; } = 100;
+    public double Progress { get; set; } = 100;
     public List<GanttActivity> SubTasks { get; set; }
 
 }
