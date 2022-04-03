@@ -28,6 +28,8 @@ a, .btn-link {
     align-items: center;
 }
 
+
+
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }

@@ -1,9 +1,7 @@
-using System.Diagnostics;
-using System.Reflection;
 
 namespace CPMMethod.Logic
 {
-    public static class CPMLogic
+    public static class CpmLogic
     {
         public static void MoveForward(this IEnumerable<Activity> activities)
         {
@@ -50,10 +48,49 @@ namespace CPMMethod.Logic
                 var preActivities = activity.PreActivities.Split(',');
                 foreach (var preActivity in preActivities)
                 {
-                    activity.Preccessors.Add(activities.Find(x => x.Id == preActivity)
+                    activity.Preccessors.Add(activities.Find(x => x.Id.ToString() == preActivity)
                                              ?? throw new InvalidOperationException());
                 }
             }
+        }
+
+        public static List<GanttActivity> CalculateGanttActivities(this List<Activity> activities)
+        {
+            var projectStart = DateTime.Now;
+            var currentDate = DateTime.Now;
+            
+            var ganttActivities = new List<GanttActivity>();
+        
+            for (var index = 0; index < activities.Count; index++)
+            {
+                var activity = activities[index];
+                var duration = (int)(activity.LateFinish - activity.EarlyStart);
+                var ganttActivity = new GanttActivity()
+                {
+                    TaskId = activity.Id,
+                    TaskName = activity.Name,
+                    Duration = duration.ToString(),
+                    Predecessor = activity.PreActivities,
+                };
+
+                if (index == 0)
+                {
+                    currentDate = projectStart;
+                    ganttActivity.StartDate = currentDate;
+                    currentDate = currentDate.AddDays(duration);
+                    ganttActivity.EndDate = currentDate;
+                }
+                else
+                {
+                    ganttActivity.StartDate = currentDate;
+                    currentDate = currentDate.AddDays(duration);
+                    ganttActivity.EndDate = currentDate;
+                }
+
+                ganttActivities.Add(ganttActivity);
+            }
+
+            return ganttActivities;
         }
     }
 }
