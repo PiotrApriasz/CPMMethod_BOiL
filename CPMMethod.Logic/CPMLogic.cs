@@ -74,6 +74,30 @@ namespace CPMMethod.Logic
                     Predecessor = activity.PreActivities,
                 }).ToList();
         }
+        
+        public static bool CheckPredecessorsCorrectness(this IEnumerable<Activity> activities, string newPreActivities)
+        {
+            var result = false;
+            
+            var preActivities = newPreActivities.Split(',');
+
+            var predecessorsCorectness = preActivities.ToDictionary(preActivity => preActivity, _ => false);
+
+            foreach (var activity in activities)
+            {
+                if (predecessorsCorectness.ContainsKey(activity.Id.ToString()))
+                    predecessorsCorectness[activity.Id.ToString()] = true;
+
+                if (predecessorsCorectness.Values.All(x => x.Equals(true)))
+                {
+                    result = true;
+                    break;
+                }
+                    
+            }
+
+            return result;
+        }
 
         public static List<GanttActivity> CalculateAsapGanttActivities(this IEnumerable<Activity> activities)
         {

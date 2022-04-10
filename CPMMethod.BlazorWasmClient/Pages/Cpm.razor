@@ -3,6 +3,7 @@
 @using CPMMethod.Logic
 @using Syncfusion.Blazor.Buttons
 @using CPMMethod.BlazorWasmClient.Components
+@using Syncfusion.Blazor.Popups
 @using EditMode = Syncfusion.Blazor.Grids.EditMode
 
 
@@ -18,12 +19,12 @@
                 Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Cancel", "Update" })">
             <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Normal"
                               NewRowPosition="NewRowPosition.Bottom"></GridEditSettings>
-            <GridEvents TValue="Activity" OnActionBegin="ActionBegin"></GridEvents>
+            <GridEvents TValue="Activity" OnActionBegin="ActionBegin" OnActionComplete="ActionComplete"></GridEvents>
             <GridColumns>
-                <GridColumn Field="@nameof(Activity.Id)" IsPrimaryKey="true"></GridColumn>
+                <GridColumn Field="@nameof(Activity.Id)" IsPrimaryKey="true" AllowAdding="false" AllowEditing="false"></GridColumn>
                 <GridColumn Field="@nameof(Activity.Name)"></GridColumn>
                 <GridColumn Field="@nameof(Activity.Duration)"
-                            ValidationRules="@(new ValidationRules { Required = true, Range = new double[] { 0, 1000 } })"></GridColumn>
+                            ValidationRules="@(new ValidationRules { Required = true, Range = new double[] { 1, 100 }})"></GridColumn>
                 <GridColumn Field="@nameof(Activity.PreActivities)"></GridColumn>
             </GridColumns>
         </SfGrid>
@@ -31,12 +32,12 @@
             <div class="button-section">
                 <div id="button-control">
                     <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
-                            <SfButton IsPrimary="true" @onclick="CalculateCpm">Oblicz</SfButton>
+                            <SfButton IsPrimary="true" @onclick="CalculateCpm" Disabled="_btDisabled">Oblicz</SfButton>
                         </div>
                     </div>
                 <div class="button2">
                     <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
-                            <SfButton IsPrimary="false" @onclick="ResetCpm">Resetuj</SfButton>
+                            <SfButton IsPrimary="false" @onclick="ResetCpm" Disabled="_btDisabled">Resetuj</SfButton>
                         </div>
                     </div>
             </div>
@@ -46,10 +47,22 @@
             <ResultTable Activities="Activities"></ResultTable>
             <h3>3. Oto standardowy wykres Gantta</h3>
             <GanttChart Activities="Activities" GanttType="GanttCharts.Standard"></GanttChart>
-            <h3>4. Oto wykres Gantta typu ASAP</h3>
+            <h3>4. Oto wykres Gantta typu ASAP (Jaśniejszy kolor oznacza czas rezerwowy)</h3>
             <GanttChart Activities="Activities" GanttType="GanttCharts.Asap"></GanttChart>
         }
     </div>
+    <SfDialog Width="335px" IsModal="true" @bind-Visible="_visibility">
+            <DialogTemplates>
+                <Header> Błąd </Header>
+                <Content>
+                    <p>Podałeś nie istniejących poprzedników. Zmodyfikuj wprowadzone informacje</p>
+                </Content>
+            </DialogTemplates>
+            <DialogButtons>
+                <DialogButton Content="Ok" IsPrimary="true" OnClick="@DlgButtonClick" />
+            </DialogButtons>
+        <DialogAnimationSettings Effect="@DialogEffect.None"></DialogAnimationSettings>
+        </SfDialog>
 </div>
 
 @code {
@@ -57,7 +70,10 @@
     private List<Activity> Activities { get; set; }
 #pragma warning restore CS8618
 
+    int _id;
     bool _calculated;
+    bool _btDisabled = true;
+    bool _visibility = false;
 
     protected override void OnInitialized()
     {
@@ -119,18 +135,58 @@
         };
 
         Activities = new List<Activity>{a, b, c, d, e, f, g, h};
+        //Activities = new List<Activity>();
+        _id = Activities.Any() ? Activities.Max(x => x.Id) : 0;
+
+        if (Activities.Count >= 2) _btDisabled = false;
     }
 
     private void ActionBegin(ActionEventArgs<Activity> arg)
     {
         if (arg.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Save))
         {
-            arg.Index = arg.Action switch
+            switch (arg.Action)
             {
-                "Add" => Activities.Count(),
-                _ => arg.Index
-                };
+                case "Add":
+                {
+                    arg.Index = Activities.Count();
+                    arg.Data.Id = _id + 1;
+                    _id++;
+                    
+                    var result = Activities.CheckPredecessorsCorrectness(arg.Data.PreActivities);
+                    if (!result)
+                        _visibility = true;
+                    else
+                        _btDisabled = false;
+                    
+                    break;
+                }
+                case "Edit":
+                {
+                    var result = Activities.CheckPredecessorsCorrectness(arg.Data.PreActivities);
+                    if (!result)
+                        _visibility = true;
+                    else
+                        _btDisabled = false;
+                    
+                    break;
+                }
+                default:
+                    arg.Index = arg.Index;
+                    break;
+            }
         }
+    }
+
+    private void ActionComplete(ActionEventArgs<Activity> arg)
+    {
+        _btDisabled = Activities.Count < 2;
+    }
+
+    private void DlgButtonClick()
+    {
+        _btDisabled = true;
+        _visibility = false;
     }
 
     private void ResetCpm()

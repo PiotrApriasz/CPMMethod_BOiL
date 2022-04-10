@@ -17,7 +17,7 @@ namespace CPMMethod.Logic
         public int Duration { get; set; }
 
         [Display(Name = "Aktywność Poprzedzająca")]
-        [Required(ErrorMessage = "Aktywność poprzedzająca jest wymagana")]
+        [CustomValidationPredecessors]
         public string PreActivities { get; set; } = String.Empty;
 
         [Display(Name = "Wczesny Start")]
