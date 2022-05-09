@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Syncfusion.Blazor.Core" Version="20.1.0.52" />
+      <PackageReference Include="Syncfusion.Blazor.Gantt" Version="20.1.0.52" />
+      <PackageReference Include="Syncfusion.Blazor.Themes" Version="20.1.0.52" />
+    </ItemGroup>
+
+</Project>

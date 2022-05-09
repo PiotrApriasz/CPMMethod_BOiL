@@ -1,0 +1,41 @@
+﻿<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-light border-bottom box-shadow mb-3">
+    <div class="container">
+        <a class="navbar-brand" href="">BOiL</a>
+        <button class="navbar-toggler" type="button" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="@NavMenuCssClass"  @onclick="ToggleNavMenu">
+            <ul class="navbar-nav flex-grow-1">
+                <li class="nav-item">
+                    <NavLink class="nav-link text-dark" href="" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span> Start
+                    </NavLink>                
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link text-dark" href="Cpm">
+                        <span class="oi oi-calendar" aria-hidden="true"></span> Metoda CPM
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link text-dark" href="Assignment">
+                        <span class="oi oi-calendar" aria-hidden="true"></span> Zagadnienie Pośrednika
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+@code {
+    bool _collapseNavMenu = true;
+
+    string _baseMenuClass = "navbar-collapse d-sm-inline-flex flex-sm-row-reverse";
+
+    string NavMenuCssClass => _baseMenuClass + (_collapseNavMenu ? " collapse" : "");
+
+    void ToggleNavMenu()
+    {
+        _collapseNavMenu = !_collapseNavMenu;
+    }
+
+}

@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Boil.BlazorWasmClient", "Boil.BlazorWasmClient\Boil.BlazorWasmClient.csproj", "{5C920F55-91C6-41B5-8CCD-8CFF77733D6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Boil.Cpm.Logic", "Boil.Cpm.Logic\Boil.Cpm.Logic.csproj", "{6356C7A9-3B3A-4702-9DFF-A5318BB3FF9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Boil.Assignment.Logic", "Boil.Assignment.Logic\Boil.Assignment.Logic.csproj", "{647A25A8-EB7F-4C96-A02F-E0B6F75D0C46}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C920F55-91C6-41B5-8CCD-8CFF77733D6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C920F55-91C6-41B5-8CCD-8CFF77733D6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C920F55-91C6-41B5-8CCD-8CFF77733D6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C920F55-91C6-41B5-8CCD-8CFF77733D6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6356C7A9-3B3A-4702-9DFF-A5318BB3FF9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6356C7A9-3B3A-4702-9DFF-A5318BB3FF9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6356C7A9-3B3A-4702-9DFF-A5318BB3FF9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6356C7A9-3B3A-4702-9DFF-A5318BB3FF9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{647A25A8-EB7F-4C96-A02F-E0B6F75D0C46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{647A25A8-EB7F-4C96-A02F-E0B6F75D0C46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{647A25A8-EB7F-4C96-A02F-E0B6F75D0C46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{647A25A8-EB7F-4C96-A02F-E0B6F75D0C46}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
