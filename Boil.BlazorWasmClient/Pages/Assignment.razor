@@ -1,6 +1,362 @@
 ﻿@page "/Assignment"
-<h3>Assignment</h3>
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.SplitButtons
+@using Syncfusion.Blazor.Buttons
+
+<h1>Zagadnienie Pośrednika</h1>
+<br/>
+<br/>
+<h3>1. Wpisz wymagane dane w celu przeprowadzenia obliczeń z zagadnienia pośrednika</h3>
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="button-group-section">
+            <div id="button-group-control">
+                <div class="row">
+                    <div class="col-md-11">
+                        <SfButtonGroup CssClass="e-btn-group">
+                            <ButtonGroupButton @onclick="AddSuppliers">Dodaj Dostawców</ButtonGroupButton>
+                            <ButtonGroupButton @onclick="SubSuppliers">Odejmij Dostawców</ButtonGroupButton>
+                            <ButtonGroupButton @onclick="AddRecipient">Dodaj Odbiorców</ButtonGroupButton>
+                            <ButtonGroupButton @onclick="SubRecipient">Odejmij Odbiorców</ButtonGroupButton>
+                        </SfButtonGroup>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col">
+                <h5>Jednostkowe koszty transportu</h5>
+                @for (var i = 0; i <= _currentSuppliersCount; i++)
+                {
+                    <div class="row">
+                        @for (var j = 0; j <= _currentRecipientCount; j++)
+                        {
+                            var supplierInfo = $"Dostawca{i}";
+                            var recipientInfo = $"Odbiorca{j}";
+
+                            var localI = i - 1;
+                            var localJ = j - 1;
+
+                            <div class="col-1">
+                                @if (i == 0 && j != 0)
+                                {
+                                    <label class="label">@recipientInfo</label>
+                                }
+                                @if (j == 0 && i != 0)
+                                {
+                                    <label class="label">@supplierInfo</label>
+                                }
+                                else if (i != 0 && j != 0)
+                                {
+                                    <SfTextBox Type="InputType.Number" EnablePersistence="true" 
+                                               @bind-Value="@_transportCost[localI, localJ]" CssClass="input" 
+                                               OnChange="OnChange"></SfTextBox>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="col">
+                <h5>Dostawca</h5>
+                @for (int j = 0; j <= 3; j++)
+                {
+                    <div class="row">
+                        @for (var i = 0; i <= _currentSuppliersCount; i++)
+                        {
+                            var info = $"Dostawca{i}";
+                            var localI = i - 1;
+                            
+                            <div class="col-1">
+                                @if (i > 0 && j == 0)
+                                {
+                                    <label class="label">@info</label>
+                                }
+                                @if (i == 0 && j == 1)
+                                {
+                                    <label class="label">Podaż</label>
+                                }
+                                @if (i == 0 && j == 2)
+                                {
+                                    <label class="label">Koszty Zakupu</label>
+                                }
+                                @if (i > 0 && j == 1)
+                                {
+                                    <SfTextBox Type="InputType.Number" EnablePersistence="true" CssClass="input"
+                                                @bind-Value="@_supply[localI]" OnChange="OnChange"></SfTextBox>
+                                }
+                                @if (i > 0 && j == 2)
+                                {
+                                    <SfTextBox Type="InputType.Number" EnablePersistence="true" CssClass="input"
+                                                @bind-Value="@_purchaseCost[localI]" OnChange="OnChange"></SfTextBox>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="col">
+                <h5>Odbiorca</h5>
+                @for (int j = 0; j <= 3; j++)
+                {
+                    <div class="row">
+                        @for (var i = 0; i <= _currentRecipientCount; i++)
+                        {
+                            var info = $"Odbiorca{i}";
+                            var localI = i - 1;
+                            
+                            <div class="col-1">
+                                @if (i > 0 && j == 0)
+                                {
+                                    <label class="label">@info</label>
+                                }
+                                @if (i == 0 && j == 1)
+                                {
+                                    <label class="label">Popyt</label>
+                                }
+                                @if (i == 0 && j == 2)
+                                {
+                                    <label class="label">Koszty Sprzedaży</label>
+                                }
+                                @if (i > 0 && j == 1)
+                                {
+                                    <SfTextBox Type="InputType.Number" EnablePersistence="true" CssClass="input"
+                                                @bind-Value="@_demand[localI]" OnChange="OnChange"></SfTextBox>
+                                }
+                                @if (i > 0 && j == 2)
+                                {
+                                    <SfTextBox Type="InputType.Number" EnablePersistence="true" CssClass="input"
+                                                @bind-Value="@_sellingCost[localI]" OnChange="OnChange"></SfTextBox>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="button-section">
+                <div id="button-control">
+                    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
+                        <SfButton IsPrimary="true" @onclick="Calculate" Disabled="_btDisabled">Oblicz</SfButton>
+                    </div>
+                </div>
+                <div class="button2">
+                    <div class="col-xs-12 col-sm-12 col-lg-6 col-md-6">
+                        <SfButton IsPrimary="false" @onclick="Reset" Disabled="_btDisabled">Resetuj</SfButton>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if (_calculated)
+        {
+            
+        }
+        </div>
+</div>
+
 
 @code {
-    
+    private int _currentSuppliersCount;
+    private int _currentRecipientCount;
+    private bool _btDisabled;
+    private bool _calculated;
+
+    private string[,] _transportCost;
+    private string[] _demand;
+    private string[] _supply;
+    private string[] _purchaseCost;
+    private string[] _sellingCost;
+
+    protected override void OnInitialized()
+    {
+        _currentSuppliersCount = 2;
+        _currentRecipientCount = 3;
+        _transportCost = new string[_currentSuppliersCount,_currentRecipientCount];
+        _demand = new string[_currentRecipientCount];
+        _supply = new string[_currentSuppliersCount];
+        _purchaseCost = new string[_currentSuppliersCount];
+        _sellingCost = new string[_currentRecipientCount];
+        _calculated = false;
+        _btDisabled = true;
+    }
+
+    private void Calculate()
+    {
+        for (int i = 0; i < _currentSuppliersCount; i++)
+        {
+            for (int j = 0; j < _currentRecipientCount; j++)
+            {
+                Console.Write($"{_transportCost[i, j]} | ");
+            }
+            Console.WriteLine();
+        }
+    }
+
+    public bool CheckCosts()
+    {
+        var correctlyFullfilled = true;
+        for (int i = 0; i < _currentSuppliersCount; i++)
+        {
+            for (int j = 0; j < _currentRecipientCount; j++)
+            {
+                var cost = int.Parse(_transportCost[i, j]);
+                if (cost <= 0)
+                {
+                    correctlyFullfilled = false;
+                    break;
+                }
+            }
+
+            if (!correctlyFullfilled) break;
+        }
+
+        return correctlyFullfilled;
+    }
+
+    public bool CheckSupplier()
+    {
+        var correctlyFullfilled = true;
+        for (int i = 0; i < _currentSuppliersCount; i++)
+        {
+            var supply = int.Parse(_supply[i]);
+            var purchaseCost = int.Parse(_purchaseCost[i]);
+
+            if (supply <= 0 || purchaseCost <= 0)
+            {
+                correctlyFullfilled = false;
+                break;
+            }
+        }
+        return correctlyFullfilled;
+    }
+
+    public bool CheckRecipient()
+    {
+        var correctlyFullfilled = true;
+        for (int i = 0; i < _currentRecipientCount; i++)
+        {
+            var demand = int.Parse(_demand[i]);
+            var sellCost = int.Parse(_sellingCost[i]);
+
+            if (demand <= 0 || sellCost <= 0)
+            {
+                correctlyFullfilled = false;
+                break;
+            }
+        }
+
+        return correctlyFullfilled;
+    }
+
+    private void OnChange(ChangeEventArgs args)
+    {
+        var cost = CheckCosts();
+        var supp = CheckSupplier();
+        var rec = CheckRecipient();
+
+        if (!cost || !supp || !rec)
+        {
+            _btDisabled = true;
+        }
+        else _btDisabled = false;
+    }
+
+    private void AddSuppliers()
+    {
+        _currentSuppliersCount++;
+        Reset();
+    }
+
+    private void SubSuppliers()
+    {
+        _currentSuppliersCount--;
+        Reset();
+    }
+
+    private void AddRecipient()
+    {
+        _currentRecipientCount++;
+        Reset();
+    }
+
+    private void SubRecipient()
+    {
+        _currentRecipientCount--;
+        Reset();
+    }
+
+    private void Reset()
+    {
+        _transportCost = new string[_currentSuppliersCount,_currentRecipientCount];
+        _demand = new string[_currentRecipientCount];
+        _supply = new string[_currentSuppliersCount];
+        _purchaseCost = new string[_currentSuppliersCount];
+        _sellingCost = new string[_currentRecipientCount];
+        _btDisabled = true;
+    }
+
 }
+
+<style>
+        .button-group-section {
+            margin: 0 auto;
+            margin-top: 1.7%;
+            margin-bottom: 1.7%;
+        }
+        .e-bigger .button-group-section {
+            width: 350px;
+        }
+        .button-group-section .row {
+            margin: 0 0 30px 0;
+        }
+        .button-group-section .row:last-child {
+            margin-bottom: 0;
+        }
+        .button-group-section .row .p:first-child {
+            margin-top: 0;
+        }
+        .label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            margin-top: 10px;
+        }
+        .col-1{
+            width: 90px;
+        }
+        .input {
+            margin-top: 10px;
+        }
+        #button-control {
+                    width: 100%;
+                    margin: 8% 0;
+                    text-align: center;
+                }
+                #button-control .e-btn {
+                    float: left;
+                }
+                #button-control2 .e-btn {
+                    margin-left: 5rem;
+                    float: left;
+                }
+                @@media only screen and (max-width: 500px) {
+                    #button-control {
+                        margin-left: -3%;
+                    }
+                }
+                
+                .button-section {
+                    width: 0;
+                }
+                #button-control .col-xs-12 {
+                    margin: 15px 0;
+                }
+                
+                .button2 {
+                            margin-left: 15px;
+                        }
+        
+</style>
