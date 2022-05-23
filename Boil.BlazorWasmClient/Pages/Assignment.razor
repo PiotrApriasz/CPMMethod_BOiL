@@ -2,6 +2,7 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.SplitButtons
 @using Syncfusion.Blazor.Buttons
+@using Boil.Assignment.Logic
 
 <h1>Zagadnienie Pośrednika</h1>
 <br/>
@@ -171,6 +172,8 @@
     private string[] _purchaseCost;
     private string[] _sellingCost;
 
+    public AssignmentModel AssignmentModel { get; set; }
+
     protected override void OnInitialized()
     {
         _currentSuppliersCount = 2;
@@ -186,14 +189,21 @@
 
     private void Calculate()
     {
+        AssignmentModel = new AssignmentModel(_transportCost, _demand, _supply, _purchaseCost, _sellingCost,
+            _currentSuppliersCount, _currentRecipientCount);
+        
+        AssignmentModel.CalculateUnitProfit();
+
         for (int i = 0; i < _currentSuppliersCount; i++)
         {
             for (int j = 0; j < _currentRecipientCount; j++)
             {
-                Console.Write($"{_transportCost[i, j]} | ");
+                Console.Write($"{AssignmentModel.UnitProfit[i, j]} | ");
             }
             Console.WriteLine();
         }
+
+        _calculated = true;
     }
 
     public bool CheckCosts()

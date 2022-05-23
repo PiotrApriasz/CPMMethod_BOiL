@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Boil.Assignment.Logic\Boil.Assignment.Logic.csproj" />
       <ProjectReference Include="..\Boil.Cpm.Logic\Boil.Cpm.Logic.csproj" />
     </ItemGroup>
 
