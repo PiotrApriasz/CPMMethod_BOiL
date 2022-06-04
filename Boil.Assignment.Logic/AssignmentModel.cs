@@ -10,20 +10,27 @@ public class AssignmentModel
     public int SupplierCount { get; set; }
     public int RecipientCount { get; set; }
     public int[,] UnitProfit { get; set; }
+    public int MaximumMiddlemanProfit { get; set; }
+    
+    //Tabela na optymalne plany przewozów dla każdej iteracji i dla ustawienia początkowego. Finalna tabela zostanie wypisana.
+    // id odpowiadają tabeli UnitProfit
+    public int[,] OptimalTransportPlan { get; set; }
 
     public AssignmentModel(string[,] transportCost, string[] demand, string[] supply, 
         string[] purchaseCost, string[] sellingCost, int supplierCount, int recipientCount)
     {
+        SupplierCount = supplierCount + 1; // plus 1 żeby było miejsce na fikcyjnych
+        RecipientCount = recipientCount + 1;
+        
         TransportCost = new int[supplierCount,recipientCount];
-        Demand = new int[recipientCount];
-        Supply = new int[supplierCount];
+        Demand = new int[RecipientCount];
+        Supply = new int[SupplierCount];
         PurchaseCost = new int[supplierCount];
         SellingCost = new int[recipientCount];
-        UnitProfit = new int[supplierCount, recipientCount];
-
-        SupplierCount = supplierCount;
-        RecipientCount = recipientCount;
+        UnitProfit = new int[SupplierCount, RecipientCount];
+        OptimalTransportPlan = new int[SupplierCount, RecipientCount];
         
+
         for (int i = 0; i < supplierCount; i++)
         {
             for (int j = 0; j < recipientCount; j++)
@@ -47,12 +54,31 @@ public class AssignmentModel
     
     public void CalculateUnitProfit()
     {
-        for (int i = 0; i < SupplierCount; i++)
+        for (int i = 0; i < SupplierCount - 1; i++)
         {
-            for (int j = 0; j < RecipientCount; j++)
+            for (int j = 0; j < RecipientCount - 1; j++)
             {
                 UnitProfit[i, j] = SellingCost[j] - (PurchaseCost[i] + TransportCost[i, j]);
             }
         }
+    }
+
+    public void CalculateFictional()
+    {
+        var fullSupply = 0;
+        var fullDemand = 0;
+        
+        for (int i = 0; i < SupplierCount - 1 ; i++)
+        {
+            fullSupply += Supply[i];
+        }
+
+        for (int i = 0; i < RecipientCount - 1; i++)
+        {
+            fullDemand += Demand[i];
+        }
+
+        Supply[SupplierCount - 1] = fullDemand;
+        Demand[RecipientCount - 1] = fullSupply;
     }
 }
