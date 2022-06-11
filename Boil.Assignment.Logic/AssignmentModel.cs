@@ -34,8 +34,8 @@ public class AssignmentModel
         SellingCost = new int[recipientCount];
         UnitProfit = new int[SupplierCount, RecipientCount];
         OptimalTransportPlan = new int[SupplierCount, RecipientCount];
-        Alpha = new int?[RecipientCount];
-        Beta = new int?[SupplierCount];
+        Alpha = new int?[SupplierCount];
+        Beta = new int?[RecipientCount];
 
         for (int i = 0; i < supplierCount; i++)
         {
@@ -104,21 +104,99 @@ public class AssignmentModel
 
         return (-1, -1);
     }
-    public void NorthWestCornerMethod() {
+    public void NorthWestCornerMethod()
+    {
+        var demand = (int[])Demand.Clone();
+        var supply = (int[])Supply.Clone();
         for(int xi = 0; xi < SupplierCount; xi++) {
             for(int yi = 0; yi < RecipientCount; yi++) {
-                int quantity = Math.Min(Demand[yi], Supply[xi]);
+                int quantity = Math.Min(demand[yi], supply[xi]);
                 if(quantity > 0) {
                     OptimalTransportPlan[xi, yi] = quantity;
-                    Demand[yi] -= quantity;
-                    Supply[xi] -= quantity;
+                    demand[yi] -= quantity;
+                    supply[xi] -= quantity;
                 }
             }
         }
     }
 
-    public void CalculateAlphaBeta() {
-        // NIEWIEM KURWA JAK TO NAPISAC
+    public void CalculateAlphaBeta()
+    {
+        var alpha = (int?[])Alpha.Clone();
+        var beta = (int?[])Beta.Clone();
+
+        var isValue = true;
+
+        foreach (var t in Alpha)
+        {
+            if (t is null)
+                isValue = false;
+        }
+        
+        foreach (var t in Beta)
+        {
+            if (t is null)
+                isValue = false;
+        }
+
+        if (isValue) return;
+
+        for (int i = 0; i < Alpha.Length; i++)
+        {
+            for (int j = 0; j < Beta.Length; j++)
+            {
+                if (OptimalTransportPlan[i,j] > 0)
+                {
+                    if (Beta[j] is null && Alpha[i] is not null)
+                    {
+                        if (j >= UnitProfit.GetLength(0) || i >= UnitProfit.GetLength(1))
+                            Beta[j] = 0 - Alpha[i];
+                        else
+                            Beta[j] = UnitProfit[i, j] - Alpha[i];
+                    }
+                    else if (Beta[j] is not null && Alpha[i] is null)
+                    {
+                        if (i >= UnitProfit.GetLength(1) || j >= UnitProfit.GetLength(0))
+                            Alpha[i] = 0 - Beta[j];
+                        else
+                            Alpha[i] = UnitProfit[i, j] - Beta[j];
+                    }
+                }
+            }
+        }
+
+        if (alpha.SequenceEqual(Alpha) && beta.SequenceEqual(Beta))
+        {
+            for (int i = 0; i < Alpha.Length; i++)
+            {
+                if (Alpha[i] is null)
+                {
+                    Alpha[i] = 0;
+                    break;
+                }
+            }
+        }
+        
+        CalculateAlphaBeta();
+    }
+
+    public int?[,] TestCycleMatrix()
+    {
+        int?[,] cycleMatrix = new int?[SupplierCount, RecipientCount];
+        for(int xi = 0; xi < SupplierCount; xi++) {
+            for(int yi = 0; yi < RecipientCount; yi++) {
+                if(OptimalTransportPlan[xi ,yi] == 0) {
+                    cycleMatrix[xi, yi] = UnitProfit[xi, yi] - Alpha[xi].GetValueOrDefault() - Beta[yi].GetValueOrDefault();
+                }
+            }
+        }
+
+        return cycleMatrix;
+    }
+
+    public (int x, int y) TestFindMax()
+    {
+        return FindMaxElementPos(TestCycleMatrix());
     }
 
     public ((int, int), (int, int), (int, int), (int, int)) FindCycle() {
@@ -126,10 +204,11 @@ public class AssignmentModel
         for(int xi = 0; xi < SupplierCount; xi++) {
             for(int yi = 0; yi < RecipientCount; yi++) {
                 if(OptimalTransportPlan[xi ,yi] == 0) {
-                    cycleMatrix[xi, yi] = UnitProfit[xi, yi] - Alpha[yi].GetValueOrDefault() - Beta[xi].GetValueOrDefault();
+                    cycleMatrix[xi, yi] = UnitProfit[xi, yi] - Alpha[xi].GetValueOrDefault() - Beta[yi].GetValueOrDefault();
                 }
             }
         }
+
         var (x, y) = FindMaxElementPos(cycleMatrix);
         if(cycleMatrix[x, y] < 0) {
             return ((-1, -1), (-1, -1), (-1, -1), (-1, -1));
