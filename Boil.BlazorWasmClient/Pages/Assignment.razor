@@ -321,25 +321,14 @@
     protected override void OnInitialized()
     {
         _currentSuppliersCount = 2;
-        _currentRecipientCount = 3;
-    //_transportCost = new string[_currentSuppliersCount,_currentRecipientCount];
-        //_demand = new string[_currentRecipientCount];
-        //_supply = new string[_currentSuppliersCount];
-        //_purchaseCost = new string[_currentSuppliersCount];
-        //_sellingCost = new string[_currentRecipientCount];
+        _currentRecipientCount = 2;
+        _transportCost = new string[_currentSuppliersCount,_currentRecipientCount];
+        _demand = new string[_currentRecipientCount];
+        _supply = new string[_currentSuppliersCount];
+        _purchaseCost = new string[_currentSuppliersCount];
+        _sellingCost = new string[_currentRecipientCount];
         _calculated = false;
-        //_btDisabled = true;
-        _btDisabled = false;
-
-        _transportCost = new string[,]
-        {
-            { "8", "14", "17" },
-            { "12", "9", "19" }
-        };
-        _demand = new[] { "10", "28", "27" };
-        _supply = new[] { "20", "30" };
-        _purchaseCost = new[] { "10", "12" };
-        _sellingCost = new[] { "30", "25", "30" };
+        _btDisabled = true;
     }
 
     private void Calculate()
@@ -350,9 +339,10 @@
         AssignmentModel.CalculateUnitProfit();
         AssignmentModel.CalculateFictional();
         AssignmentModel.NorthWestCornerMethod();
-        
-        while(AssignmentModel.DoCycle());
 
+        while (AssignmentModel.DoCycle()) { }
+
+        AssignmentModel.CalculateMaximumProfit();
         _calculated = true;
     }
 
@@ -457,15 +447,14 @@
         _purchaseCost = new string[_currentSuppliersCount];
         _sellingCost = new string[_currentRecipientCount];
         _btDisabled = true;
+        _calculated = false;
     }
 
 }
 
 <style>
         .button-group-section {
-            margin: 0 auto;
-            margin-top: 1.7%;
-            margin-bottom: 1.7%;
+            margin: 1.7% auto;
         }
         .e-bigger .button-group-section {
             width: 350px;

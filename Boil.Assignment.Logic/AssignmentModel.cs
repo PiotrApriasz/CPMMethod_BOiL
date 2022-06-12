@@ -14,7 +14,6 @@ public class AssignmentModel
     // Calculation data
     public int?[] Alpha { get; set; }
     public int?[] Beta { get; set; }
-    // CHUJ WIE CO TO ZA DATA
     public int MaximumMiddlemanProfit { get; set; }
     
     //Tabela na optymalne plany przewozów dla każdej iteracji i dla ustawienia początkowego. Finalna tabela zostanie wypisana.
@@ -36,6 +35,7 @@ public class AssignmentModel
         OptimalTransportPlan = new int[SupplierCount, RecipientCount];
         Alpha = new int?[SupplierCount];
         Beta = new int?[RecipientCount];
+        MaximumMiddlemanProfit = 0;
 
         for (int i = 0; i < supplierCount; i++)
         {
@@ -179,25 +179,7 @@ public class AssignmentModel
         
         CalculateAlphaBeta();
     }
-
-    public int?[,] TestCycleMatrix()
-    {
-        int?[,] cycleMatrix = new int?[SupplierCount, RecipientCount];
-        for(int xi = 0; xi < SupplierCount; xi++) {
-            for(int yi = 0; yi < RecipientCount; yi++) {
-                if(OptimalTransportPlan[xi ,yi] == 0) {
-                    cycleMatrix[xi, yi] = UnitProfit[xi, yi] - Alpha[xi].GetValueOrDefault() - Beta[yi].GetValueOrDefault();
-                }
-            }
-        }
-
-        return cycleMatrix;
-    }
-
-    public (int x, int y) TestFindMax()
-    {
-        return FindMaxElementPos(TestCycleMatrix());
-    }
+    
     public void print_matrix(int?[,] matrix, string text) {
         Console.WriteLine(text);
         for (int i = 0; i < matrix.GetLength(0); i++)
@@ -296,5 +278,20 @@ public class AssignmentModel
         OptimalTransportPlan[x4, y4] -= MinValue;
 
         return true;
+    }
+
+    public void CalculateMaximumProfit()
+    {
+        for (int i = 0; i < SupplierCount; i++)
+        {
+            for (int j = 0; j < RecipientCount; j++)
+            {
+                if (OptimalTransportPlan[i, j] > 0)
+                {
+                    MaximumMiddlemanProfit += OptimalTransportPlan[i, j] * UnitProfit[i, j];
+                }
+                    
+            }
+        }
     }
 }
