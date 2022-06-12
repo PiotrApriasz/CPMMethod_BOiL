@@ -350,42 +350,8 @@
         AssignmentModel.CalculateUnitProfit();
         AssignmentModel.CalculateFictional();
         AssignmentModel.NorthWestCornerMethod();
-        AssignmentModel.CalculateAlphaBeta();
-        //var ((x1, y1), (x2, y2), (x3, y3), (x4, y4)) = AssignmentModel.FindCycle();
-
-        Console.WriteLine("[{0}]", string.Join(", ", AssignmentModel.Alpha));
-        Console.WriteLine("[{0}]", string.Join(", ", AssignmentModel.Beta));
-        //Console.WriteLine("[{0}]", string.Join(", ", x1, x2, x3, x4));
-        //Console.WriteLine("[{0}]", string.Join(", ", y1, y2, y3, y4));
-
-         //AssignmentModel.DoCycle(); 
-
-        var testCycleMatrix = AssignmentModel.TestCycleMatrix();
-
-        Console.WriteLine("Cycle matrix");
-        for (int i = 0; i < _currentSuppliersCount + 1; i++)
-        {
-            for (int j = 0; j < _currentRecipientCount + 1; j++)
-            {
-                if (testCycleMatrix[i,j] is null)
-                    Console.Write("0 | ");
-                else
-                    Console.Write($"{testCycleMatrix[i, j]} | ");
-            }
-            Console.WriteLine();
-        }
-
-        Console.WriteLine("Max element in cycle matrix");
-        var testMax = AssignmentModel.TestFindMax();
-        Console.WriteLine($"{testMax.x} | {testMax.y}");
-
-        Console.WriteLine("Find cycle");
-        var ((x1, y1), (x2, y2), (x3, y3), (x4, y4)) = AssignmentModel.FindCycle();
-        Console.WriteLine($"{x1}, {y1}");
-        Console.WriteLine($"{x2}, {y2}");
-        Console.WriteLine($"{x3}, {y3}");
-        Console.WriteLine($"{x4}, {y4}");
         
+        while(AssignmentModel.DoCycle());
 
         _calculated = true;
     }

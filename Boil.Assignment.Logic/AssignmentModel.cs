@@ -198,41 +198,103 @@ public class AssignmentModel
     {
         return FindMaxElementPos(TestCycleMatrix());
     }
-
+    public void print_matrix(int?[,] matrix, string text) {
+        Console.WriteLine(text);
+        for (int i = 0; i < matrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < matrix.GetLength(1); j++)
+            {
+                if (matrix[i,j] is null)
+                    Console.Write("NULL | ");
+                else
+                    Console.Write($"{matrix[i, j]} | ");
+            }
+            Console.WriteLine();
+        }
+    }
     public ((int, int), (int, int), (int, int), (int, int)) FindCycle() {
+
+        // Create new matrix with values for finding cycle
         int?[,] cycleMatrix = new int?[SupplierCount, RecipientCount];
+
+        // Reinicialize aplha and beta
+        Alpha = new int?[SupplierCount];
+        Beta = new int?[RecipientCount];
+
+        // Calculate alpha and beta values
+        this.CalculateAlphaBeta();
+
+        // Fill up new matrix with values
         for(int xi = 0; xi < SupplierCount; xi++) {
             for(int yi = 0; yi < RecipientCount; yi++) {
+
+                // Initialize only values with no transportation
                 if(OptimalTransportPlan[xi ,yi] == 0) {
                     cycleMatrix[xi, yi] = UnitProfit[xi, yi] - Alpha[xi].GetValueOrDefault() - Beta[yi].GetValueOrDefault();
                 }
             }
         }
 
+        print_matrix(cycleMatrix, "cycleMatrix:");
+
+        // Find the greatest value in matrix
         var (x, y) = FindMaxElementPos(cycleMatrix);
+
+        Console.WriteLine("FindMaxElementPos:\n(" + x + ", " + y + ") = " + cycleMatrix[x, y]);
+
+        // Check wheter the matrix is complete
         if(cycleMatrix[x, y] < 0) {
             return ((-1, -1), (-1, -1), (-1, -1), (-1, -1));
         }
+
+        Console.WriteLine("FindCycle:");
+
+        // Iterate threw matrix in order to find cycle
         for(int xi = 0; xi < SupplierCount; xi++) {
             for(int yi = 0; yi < RecipientCount; yi++) {
+
+                Console.WriteLine("(" + xi + ", " + yi + ") = " + (cycleMatrix[xi, yi] == null ? "null" : cycleMatrix[xi, yi]));
+                Console.WriteLine("(" + x + ", " + y + ") = " + (cycleMatrix[x, y] == null ? "null" : cycleMatrix[x, y]));
+                Console.WriteLine("(" + x + ", " + yi + ") = " + (cycleMatrix[x, yi] == null ? "null" : cycleMatrix[x, yi]));
+                Console.WriteLine("(" + xi + ", " + y + ") = " + (cycleMatrix[xi, y] == null ? "null" : cycleMatrix[xi, y]) + "\n");
+
+                // If value is on the same row, column or value is not null - skip
                 if(x == xi || y == yi || cycleMatrix[xi, yi] != null) {
-                    break;
+                    Console.WriteLine("BREAK!");
+                    continue;
                 }
+
+                // If can create cycle - return coordinates of cycle edges in matrix
                 if(cycleMatrix[x, yi] == null && cycleMatrix[xi, y] == null) {
                     return ((x, y), (xi, yi), (x, yi), (xi, y));
                 }
             }
         }
+
+        // If no cycle has been foun return -1
         return ((-1, -1), (-1, -1), (-1, -1), (-1, -1));
     }
 
-    public void DoCycle() {
+    public bool DoCycle() {
+
+        // Get coordinates of cycle edges in matrix
         var ((x1, y1), (x2, y2), (x3, y3), (x4, y4)) = FindCycle();
-        if (x1 == -1) { return; }
-        int MinValue = (new int[] {OptimalTransportPlan[x1, y1], OptimalTransportPlan[x2, y2], OptimalTransportPlan[x3, y3], OptimalTransportPlan[x4, y4]}).Min();
+
+        Console.WriteLine("Cycle:\n[{0}]", string.Join(", ", x1, x2, x3, x4));
+        Console.WriteLine("[{0}]", string.Join(", ", y1, y2, y3, y4));
+
+        // Check wheter any cycle has been found
+        if (x1 == -1) { return false; }
+
+        // Get minimal value in cycle
+        int MinValue = (new int[] {OptimalTransportPlan[x1, y1], OptimalTransportPlan[x2, y2], OptimalTransportPlan[x3, y3], OptimalTransportPlan[x4, y4]}).Where(val => val > 0).Min();
+
+        // Carry out the cycle
         OptimalTransportPlan[x1, y1] += MinValue;
         OptimalTransportPlan[x2, y2] += MinValue;
         OptimalTransportPlan[x3, y3] -= MinValue;
         OptimalTransportPlan[x4, y4] -= MinValue;
+
+        return true;
     }
 }
